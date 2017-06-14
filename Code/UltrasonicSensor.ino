@@ -1,41 +1,45 @@
-/*
-HC-SR04 Ping distance sensor]
-VCC to arduino 5v GND to arduino GND
-Echo to Arduino pin 13 Trig to Arduino pin
-Original code improvements to the Ping sketch sourced from Trollmaker.com
-*/
+#define echoPin 10 // Echo Pin
+#define trigPin 11 // Trigger Pin
 
-#define trigPin 13
-#define echoPin 12
+int maximumRange = 200; // Maximum range needed
+int minimumRange = 0; // Minimum range needed
+long duration, distance; // Duration used to calculate distance
 
 void setup() {
-  Serial.begin (9600);
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-  pinMode(LED_BUILTIN, OUTPUT);
+ Serial.begin (9600);
+ pinMode(trigPin, OUTPUT);
+ pinMode(echoPin, INPUT);
+ pinMode(LED_BUILTIN, OUTPUT); // Use LED indicator (if required)
 }
 
 void loop() {
-  long duration, distance;
-  digitalWrite(trigPin, LOW);  // Added this line
-  delayMicroseconds(2); // Added this line
-  digitalWrite(trigPin, HIGH);
-//  delayMicroseconds(1000); - Removed this line
-  delayMicroseconds(10); // Added this line
-  digitalWrite(trigPin, LOW);
-  duration = pulseIn(echoPin, HIGH);
-  distance = (duration/2) / 29.1;
-  if (distance < 4) {  // This is where the LED On/Off happens
-    digitalWrite(LED_BUILTIN,HIGH);
-}
-  if (distance >= 200 || distance <= 0){
-    Serial.println("Out of range");
-  }
-  else {
-    Serial.print(distance);
-    Serial.println(" cm");
-  }
-  delay(500);
-}
-  Cayenne.run();
+/* The following trigPin/echoPin cycle is used to determine the
+ distance of the nearest object by bouncing soundwaves off of it. */ 
+ digitalWrite(trigPin, LOW); 
+ delayMicroseconds(2); 
+
+ digitalWrite(trigPin, HIGH);
+ delayMicroseconds(10); 
+ 
+ digitalWrite(trigPin, LOW);
+ duration = pulseIn(echoPin, HIGH);
+ 
+ //Calculate the distance (in cm) based on the speed of sound.
+ distance = duration/58.2;
+ 
+ if (distance >= maximumRange || distance <= minimumRange){
+ /* Send a negative number to computer and Turn LED ON 
+ to indicate "out of range" */
+ Serial.println("-1");
+ digitalWrite(LED_BUILTIN, HIGH); 
+ }
+ else {
+ /* Send the distance to the computer using Serial protocol, and
+ turn LED OFF to indicate successful reading. */
+ Serial.println(distance);
+ digitalWrite(LED_BUILTIN, LOW); 
+ }
+ 
+ //Delay 50ms before next reading.
+ delay(50);
 }
